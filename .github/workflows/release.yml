@@ -9,6 +9,9 @@ jobs:
   publish-npm:
     name: Publish npm SDK
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v4
       
@@ -27,13 +30,13 @@ jobs:
         
       - name: Publish to npm
         working-directory: ./sdk/npm
-        run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public --provenance
 
   publish-pypi:
     name: Publish Python SDK
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     steps:
       - uses: actions/checkout@v4
       
@@ -45,11 +48,14 @@ jobs:
       - name: Install Poetry
         run: pipx install poetry
         
-      - name: Build and publish to PyPI
+      - name: Build Python SDK
         working-directory: ./sdk/python
-        run: |
-          poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
-          poetry publish --build
+        run: poetry build
+        
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: ./sdk/python/dist/
 
   github-release:
     name: Create GitHub Release
