@@ -52,5 +52,11 @@ jobs:
       - name: Build Assets
         run: npm run build
 
+      - name: TypeScript Type Check
+        run: npm run types:check
+
+      - name: PHP Lint (Pint)
+        run: vendor/bin/pint --test
+
       - name: Tests
         run: ./vendor/bin/pest
