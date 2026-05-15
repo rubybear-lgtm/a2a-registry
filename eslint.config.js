@@ -108,6 +108,8 @@ export default [
     {
         ignores: [
             '.agents/**',
+            '.claude/**',
+            '.cursor/**',
             '.codex/**',
             '.impeccable-live.json',
             'vendor',

@@ -41,7 +41,7 @@ test('the generated npm and python sdk package manifests exist', function () {
     $pythonManifest = file_get_contents($pythonManifestPath);
 
     expect($npmManifest['name'])->toBe('@a2a-registry/sdk');
-    expect($pythonManifest)->toContain('name = "a2a-registry-sdk"');
+    expect($pythonManifest)->toContain('name = "agent2agent-registry"');
     expect($pythonManifest)->toContain('include = ["a2a_registry_sdk/py.typed"]');
     expect($pythonManifest)->not->toContain('README.md');
     expect($pythonManifest)->not->toContain('CHANGELOG.md');

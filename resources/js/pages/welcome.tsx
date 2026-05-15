@@ -16,7 +16,10 @@ function JsonHighlight({ json }: { json: string }) {
             const [full, key, str, kw, num, punct] = match;
             const start = match.index!;
 
-            if (start > last) nodes.push(json.slice(last, start));
+            if (start > last) {
+                nodes.push(json.slice(last, start));
+            }
+
             last = start + full.length;
 
             if (key !== undefined) {
@@ -37,7 +40,10 @@ function JsonHighlight({ json }: { json: string }) {
             }
         }
 
-        if (last < json.length) nodes.push(json.slice(last));
+        if (last < json.length) {
+            nodes.push(json.slice(last));
+        }
+
         return nodes;
     }, [json]);
 

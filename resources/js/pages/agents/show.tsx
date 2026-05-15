@@ -2,7 +2,6 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import { Copy, ExternalLink } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 
-import AgentRegistry from '@/actions/App/Http/Controllers/AgentRegistry';
 import AppLogoIcon from '@/components/app-logo-icon';
 import { useClipboard } from '@/hooks/use-clipboard';
 import { home } from '@/routes';
@@ -66,8 +65,6 @@ type Props = {
     agent: Agent;
 };
 
-const DISPLAY = '"Big Shoulders Display", sans-serif';
-
 function relativeTime(iso: string): string {
     const diff = Date.now() - new Date(iso).getTime();
     const m = Math.floor(diff / 60000);
@@ -87,30 +84,6 @@ function relativeTime(iso: string): string {
     }
 
     return `${Math.floor(h / 24)}d ago`;
-}
-
-function StatusBadge({ status }: { status: string }) {
-    const label = status.charAt(0).toUpperCase() + status.slice(1);
-    const isActive = status === 'active';
-
-    return (
-        <span className="flex items-center gap-1.5">
-            <span className="relative flex size-1.5 shrink-0">
-                {isActive ? (
-                    <>
-                        <span
-                            className="absolute inline-flex size-full animate-ping rounded-full bg-(--solar-green)/30"
-                            style={{ animationDuration: '2.5s' }}
-                        />
-                        <span className="relative inline-flex size-1.5 rounded-full bg-(--solar-green)" />
-                    </>
-                ) : (
-                    <span className="relative inline-flex size-1.5 rounded-full bg-muted-foreground/30" />
-                )}
-            </span>
-            <span className="font-mono text-[11px] text-muted-foreground">{label}</span>
-        </span>
-    );
 }
 
 function SkillRow({ skill }: { skill: AgentSkill }) {
@@ -312,17 +285,10 @@ export default function AgentsShow() {
                 setTimeout(() => setCopiedKey(null), 1500);
             }
         },
-        [copy],
-    );
+            [copy],
+        );
 
-    const capList = [
-        agent.supports_streaming && 'streaming',
-        agent.supports_push_notifications && 'push',
-        agent.supports_extended_agent_card && 'extended card',
-        agent.has_auth && 'auth',
-    ].filter(Boolean) as string[];
-
-    const rawCardJson = agent.raw_card ? JSON.stringify(agent.raw_card, null, 2) : null;
+        const rawCardJson = agent.raw_card ? JSON.stringify(agent.raw_card, null, 2) : null;
 
     const requiredSchemes = new Set(
         (agent.security_requirements ?? []).flatMap((r) => Object.keys(r)),
