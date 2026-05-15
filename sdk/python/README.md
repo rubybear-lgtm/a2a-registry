@@ -1,11 +1,11 @@
-# a2a-registry-sdk
+# agent2agent-registry
 
 Python client for the [A2A Registry API](https://github.com/rubybear-lgtm/a2a-registry). Discover and browse registered A2A protocol agents.
 
 ## Install
 
 ```bash
-pip install a2a-registry-sdk
+pip install agent2agent-registry
 ```
 
 ## Quick start
