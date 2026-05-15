@@ -2,6 +2,41 @@
 
 A public registry for [Agent-to-Agent (A2A) protocol](https://google.github.io/A2A) agents. The app lets you ingest public A2A agent cards, normalize them into searchable registry records, browse them on the web, query them over a versioned JSON API, and generate SDKs from a checked-in OpenAPI contract.
 
+## Why this exists
+
+At its core, the A2A Registry and its SDKs solve the **discovery and integration problem for the agentic web**. 
+
+While the Agent-to-Agent (A2A) protocol defines *how* AI agents talk to each other, they still need a way to find each other.
+
+### 1. Agent Discovery
+If you build an AI agent that can book flights, how does a personal assistant agent know your agent exists? How does it know what capabilities your agent has, what API endpoints it exposes, or what authentication it requires? 
+
+Without a registry, agent integration requires manual hardcoding. Developers have to read documentation, manually configure endpoints, and hardcode API keys for every single agent-to-agent connection.
+
+### 2. The Registry Solution
+The registry acts as the "DNS" or "npm" for AI agents. It provides:
+- **Standardized Ingestion:** It fetches public A2A "agent cards" (JSON manifests defining an agent's capabilities, interfaces, and security requirements) and validates them against the A2A 1.0 spec.
+- **Normalization & Search:** It indexes these cards so they can be searched by capability, provider, or name.
+- **Human Evaluation:** A precise, authoritative web interface where developers and ops teams can browse, compare, and evaluate agents before trusting them.
+- **Health Monitoring:** It continuously re-validates agent cards and degrades listings if the agent's endpoints go down or their card becomes invalid.
+
+### 3. Programmatic Integration via SDKs
+The npm and Python SDKs solve the "last mile" problem for developers building agentic systems. 
+
+Instead of writing raw HTTP requests to search the registry and parse complex JSON schemas, a developer building a Python or TypeScript agent can use the SDK to dynamically discover capabilities at runtime:
+
+```python
+# A personal assistant agent needs to find a calendar agent
+calendar_agents = registry.list_agents(q="calendar", status="active")
+
+# It fetches the exact connection details (interfaces, auth requirements)
+card = registry.get_agent_card(calendar_agents.data[0].id)
+
+# Now it knows exactly how to initiate an A2A handshake with that agent
+```
+
+This transforms the A2A protocol from a theoretical standard into a practical, searchable ecosystem where agents can dynamically discover, evaluate, and connect with one another.
+
 ## Stack
 
 - Backend: Laravel 13, PHP 8.3+
