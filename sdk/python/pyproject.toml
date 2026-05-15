@@ -1,8 +1,23 @@
 [tool.poetry]
 name = "a2a-registry-sdk"
 version = "1.0.0"
-description = "A client library for accessing A2A Registry API"
-authors = []
+description = "Python client for the A2A Registry API — discover and browse registered A2A protocol agents."
+authors = ["A2A Registry Contributors"]
+license = "MIT"
+repository = "https://github.com/rubybear-lgtm/a2a-registry"
+homepage = "https://github.com/rubybear-lgtm/a2a-registry#readme"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet :: WWW/HTTP",
+    "Typing :: Typed",
+]
 packages = [
     { include = "a2a_registry_sdk" },
 ]

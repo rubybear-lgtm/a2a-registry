@@ -58,5 +58,11 @@ jobs:
       - name: PHP Lint (Pint)
         run: vendor/bin/pint --test
 
+      - name: Validate OpenAPI Spec
+        run: php -r "json_decode(file_get_contents('sdk/openapi/a2a-registry.v1.json'), true, 512, JSON_THROW_ON_ERROR); echo 'OK';"
+
+      - name: Build npm SDK
+        run: npx -p typescript tsc -p sdk/npm/tsconfig.json
+
       - name: Tests
         run: ./vendor/bin/pest

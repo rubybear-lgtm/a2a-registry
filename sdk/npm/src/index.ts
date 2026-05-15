@@ -31,3 +31,5 @@ export type { SecurityRequirement } from './models/SecurityRequirement';
 export type { ValidationErrorResponse } from './models/ValidationErrorResponse';
 
 export { AgentsService } from './services/AgentsService';
+export { createA2ARegistryClient } from './client';
+export type { A2ARegistryClient, A2ARegistryClientOptions } from './client';

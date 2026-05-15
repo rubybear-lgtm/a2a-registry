@@ -1,11 +1,35 @@
 {
     "name": "@a2a-registry/sdk",
     "version": "1.0.0",
+    "description": "TypeScript client for the A2A Registry API — discover and browse registered A2A protocol agents.",
+    "license": "MIT",
+    "author": "A2A Registry Contributors",
     "private": false,
     "type": "module",
     "sideEffects": false,
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/rubybear-lgtm/a2a-registry.git"
+    },
+    "bugs": {
+        "url": "https://github.com/rubybear-lgtm/a2a-registry/issues"
+    },
+    "homepage": "https://github.com/rubybear-lgtm/a2a-registry#readme",
+    "keywords": [
+        "a2a",
+        "agent-to-agent",
+        "registry",
+        "ai-agents",
+        "openapi"
+    ],
+    "engines": {
+        "node": ">=18"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
     "exports": {
         ".": {
             "types": "./dist/index.d.ts",
