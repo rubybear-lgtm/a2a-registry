@@ -10,6 +10,9 @@
         "format:check": "prettier --check resources/",
         "lint": "eslint . --fix",
         "lint:check": "eslint .",
+        "sdk:generate": "./sdk/scripts/generate-all-sdks.sh",
+        "sdk:generate:npm": "./sdk/scripts/generate-npm-sdk.sh",
+        "sdk:generate:python": "./sdk/scripts/generate-python-sdk.sh",
         "types:check": "tsc --noEmit"
     },
     "devDependencies": {

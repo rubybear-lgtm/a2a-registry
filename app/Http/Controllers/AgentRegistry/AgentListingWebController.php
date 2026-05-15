@@ -6,6 +6,7 @@ use App\Enums\AgentListingStatus;
 use App\Http\Controllers\Controller;
 use App\Models\AgentListing;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -92,7 +93,14 @@ class AgentListingWebController extends Controller
                 'supported_interfaces' => $agentListing->supported_interfaces_json,
                 'security_schemes' => $agentListing->security_schemes_json,
                 'security_requirements' => $agentListing->security_requirements_json,
-                'validation_warnings' => $agentListing->validation_warnings_json ?? [],
+                'validation_warnings' => collect($agentListing->validation_warnings_json ?? [])
+                    ->flatMap(
+                        fn (mixed $messages, string $key): array => collect(is_array($messages) ? $messages : [$messages])
+                            ->map(fn (mixed $message): string => sprintf('%s: %s', Str::headline($key), (string) $message))
+                            ->all(),
+                    )
+                    ->values()
+                    ->all(),
                 'raw_card' => $agentListing->raw_card_json,
             ],
         ]);

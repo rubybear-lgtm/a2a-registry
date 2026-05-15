@@ -13,18 +13,14 @@ class StoreAgentListingRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        $user = $this->user();
+        $configuredToken = (string) config('agent-registry.management_token', '');
+        $providedToken = $this->bearerToken() ?? (string) $this->header('X-Agent-Registry-Token', '');
 
-        if (! $user) {
+        if ($configuredToken === '' || $providedToken === '') {
             return false;
         }
 
-        $operatorEmails = array_map(
-            static fn (string $email): string => mb_strtolower($email),
-            config('agent-registry.operator_emails', []),
-        );
-
-        return in_array(mb_strtolower((string) $user->email), $operatorEmails, true);
+        return hash_equals($configuredToken, $providedToken);
     }
 
     /**

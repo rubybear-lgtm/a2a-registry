@@ -1,16 +1,19 @@
 <?php
 
+use App\Actions\AgentRegistry\IngestAgentCard;
 use App\Enums\AgentListingStatus;
+use App\Jobs\AgentRegistry\RefreshAgentListing;
+use App\Jobs\AgentRegistry\ValidateAgentListingLinks;
 use App\Models\AgentListing;
 use App\Models\AgentListingRevision;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Queue;
 
 uses(RefreshDatabase::class);
 
-test('operators can refresh an existing agent listing', function () {
-    config()->set('agent-registry.operator_emails', ['operator@example.com']);
+test('the refresh job updates an existing agent listing and queues link validation', function () {
+    Queue::fake();
 
     $listing = AgentListing::factory()->create([
         'source_url' => 'https://agents.example.com/.well-known/agent-card.json',
@@ -20,6 +23,7 @@ test('operators can refresh an existing agent listing', function () {
         'etag' => '"agent-card-v1"',
         'content_hash' => 'old-hash',
         'status' => AgentListingStatus::Active,
+        'refresh_due_at' => now()->subMinute(),
     ]);
 
     AgentListingRevision::factory()->for($listing)->create([
@@ -65,15 +69,7 @@ test('operators can refresh an existing agent listing', function () {
         ]),
     ]);
 
-    $user = User::factory()->create([
-        'email' => 'operator@example.com',
-    ]);
-
-    $this->actingAs($user)
-        ->postJson(route('agent-listings.refresh', $listing))
-        ->assertOk()
-        ->assertJsonPath('data.name', 'Route Planner')
-        ->assertJsonPath('data.status', 'active');
+    (new RefreshAgentListing($listing->id))->handle(app(IngestAgentCard::class));
 
     $listing->refresh();
 
@@ -81,14 +77,18 @@ test('operators can refresh an existing agent listing', function () {
     expect($listing->description)->toBe('Updated description.');
     expect($listing->etag)->toBe('"agent-card-v2"');
     expect($listing->revisions()->count())->toBe(2);
+    Queue::assertPushed(ValidateAgentListingLinks::class, function (ValidateAgentListingLinks $job) use ($listing): bool {
+        return $job->agentListingId === $listing->id;
+    });
 });
 
-test('refresh returns the existing listing when the agent card is not modified', function () {
-    config()->set('agent-registry.operator_emails', ['operator@example.com']);
+test('the refresh job preserves a listing when the agent card is not modified', function () {
+    Queue::fake();
 
     $listing = AgentListing::factory()->create([
         'source_url' => 'https://agents.example.com/.well-known/agent-card.json',
         'etag' => '"agent-card-v1"',
+        'refresh_due_at' => now()->subMinute(),
     ]);
 
     Http::fake([
@@ -97,14 +97,11 @@ test('refresh returns the existing listing when the agent card is not modified',
         ]),
     ]);
 
-    $user = User::factory()->create([
-        'email' => 'operator@example.com',
-    ]);
-
-    $this->actingAs($user)
-        ->postJson(route('agent-listings.refresh', $listing))
-        ->assertOk()
-        ->assertJsonPath('data.id', $listing->public_id);
+    (new RefreshAgentListing($listing->id))->handle(app(IngestAgentCard::class));
 
     expect($listing->fresh()->revisions()->count())->toBe(0);
+    expect($listing->fresh()->last_http_status)->toBe(304);
+    Queue::assertPushed(ValidateAgentListingLinks::class, function (ValidateAgentListingLinks $job) use ($listing): bool {
+        return $job->agentListingId === $listing->id;
+    });
 });

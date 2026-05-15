@@ -12,6 +12,17 @@ use Illuminate\Validation\Rule;
 
 class AgentListingController extends Controller
 {
+    private const PER_PAGE = 15;
+
+    /**
+     * @var array<int, AgentListingStatus>
+     */
+    private const PUBLIC_STATUSES = [
+        AgentListingStatus::Active,
+        AgentListingStatus::Stale,
+        AgentListingStatus::Degraded,
+    ];
+
     /**
      * Display a listing of the resource.
      */
@@ -27,11 +38,7 @@ class AgentListingController extends Controller
         ]);
 
         $query = AgentListing::query()
-            ->whereIn('status', [
-                AgentListingStatus::Active,
-                AgentListingStatus::Stale,
-                AgentListingStatus::Degraded,
-            ]);
+            ->whereIn('status', self::PUBLIC_STATUSES);
 
         if ($status = request()->string('status')->toString()) {
             $query->where('status', $status);
@@ -48,7 +55,7 @@ class AgentListingController extends Controller
         }
 
         return AgentListingResource::collection(
-            $query->orderBy('name')->paginate(15)->withQueryString(),
+            $query->orderBy('name')->paginate(self::PER_PAGE)->withQueryString(),
         );
     }
 
@@ -74,10 +81,6 @@ class AgentListingController extends Controller
 
     private function isPubliclyVisible(AgentListing $agentListing): bool
     {
-        return in_array($agentListing->status, [
-            AgentListingStatus::Active,
-            AgentListingStatus::Stale,
-            AgentListingStatus::Degraded,
-        ], true);
+        return in_array($agentListing->status, self::PUBLIC_STATUSES, true);
     }
 }

@@ -1,0 +1,797 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "A2A Registry API",
+        "version": "1.0.0",
+        "description": "Read-only API for discovering registered A2A agents and retrieving their standardized agent cards."
+    },
+    "servers": [
+        {
+            "url": "https://a2a-registry.example.com",
+            "description": "Default registry host. SDK consumers should override this for their target environment."
+        }
+    ],
+    "tags": [
+        {
+            "name": "Agents",
+            "description": "Read-only operations for browsing the registry."
+        }
+    ],
+    "paths": {
+        "/api/v1/agents": {
+            "get": {
+                "tags": [
+                    "Agents"
+                ],
+                "operationId": "listAgents",
+                "summary": "List visible agent listings",
+                "description": "Returns a paginated collection of publicly visible agent listings.",
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "required": false,
+                        "description": "Case-insensitive search across listing name, description, provider, and indexed agent metadata.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "description": "Filter results to a single visible listing status.",
+                        "schema": {
+                            "$ref": "#/components/schemas/AgentListingStatus"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "description": "Laravel paginator page number.",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated visible agent listings.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedAgentListingResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error for unsupported query parameters.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/agents/{agentListing}": {
+            "get": {
+                "tags": [
+                    "Agents"
+                ],
+                "operationId": "getAgent",
+                "summary": "Fetch a single visible agent listing",
+                "parameters": [
+                    {
+                        "name": "agentListing",
+                        "in": "path",
+                        "required": true,
+                        "description": "The public registry identifier for the agent listing.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The normalized agent listing resource.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AgentListingResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "The agent listing is not publicly visible or does not exist.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/agents/{agentListing}/card": {
+            "get": {
+                "tags": [
+                    "Agents"
+                ],
+                "operationId": "getAgentCard",
+                "summary": "Fetch the raw A2A agent card for a listing",
+                "parameters": [
+                    {
+                        "name": "agentListing",
+                        "in": "path",
+                        "required": true,
+                        "description": "The public registry identifier for the agent listing.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The standardized A2A 1.0 agent card for the listing.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AgentCardResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "The agent listing is not publicly visible or does not exist.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "AgentListingStatus": {
+                "type": "string",
+                "enum": [
+                    "active",
+                    "stale",
+                    "degraded"
+                ]
+            },
+            "ErrorResponse": {
+                "type": "object",
+                "required": [
+                    "message"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    }
+                }
+            },
+            "ValidationErrorResponse": {
+                "type": "object",
+                "required": [
+                    "message",
+                    "errors"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    },
+                    "errors": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "PaginatedAgentListingResponse": {
+                "type": "object",
+                "required": [
+                    "data",
+                    "links",
+                    "meta"
+                ],
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AgentListing"
+                        }
+                    },
+                    "links": {
+                        "$ref": "#/components/schemas/PaginationLinks"
+                    },
+                    "meta": {
+                        "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                }
+            },
+            "PaginationLinks": {
+                "type": "object",
+                "required": [
+                    "first",
+                    "last",
+                    "prev",
+                    "next"
+                ],
+                "properties": {
+                    "first": {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "last": {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "prev": {
+                        "type": "string",
+                        "format": "uri",
+                        "nullable": true
+                    },
+                    "next": {
+                        "type": "string",
+                        "format": "uri",
+                        "nullable": true
+                    }
+                }
+            },
+            "PaginationMeta": {
+                "type": "object",
+                "required": [
+                    "current_page",
+                    "from",
+                    "last_page",
+                    "path",
+                    "per_page",
+                    "to",
+                    "total"
+                ],
+                "properties": {
+                    "current_page": {
+                        "type": "integer"
+                    },
+                    "from": {
+                        "type": "integer"
+                    },
+                    "last_page": {
+                        "type": "integer"
+                    },
+                    "path": {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "per_page": {
+                        "type": "integer"
+                    },
+                    "to": {
+                        "type": "integer"
+                    },
+                    "total": {
+                        "type": "integer"
+                    }
+                },
+                "additionalProperties": true
+            },
+            "AgentListingResponse": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/AgentListing"
+                    }
+                }
+            },
+            "AgentCardResponse": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/AgentCardEnvelope"
+                    }
+                }
+            },
+            "AgentListing": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "name",
+                    "description",
+                    "provider_name",
+                    "agent_version",
+                    "documentation_url",
+                    "icon_url",
+                    "preferred_interface_url",
+                    "preferred_protocol_binding",
+                    "preferred_protocol_version",
+                    "status",
+                    "has_auth",
+                    "supports_streaming",
+                    "supports_push_notifications",
+                    "supports_extended_agent_card",
+                    "default_input_modes",
+                    "default_output_modes",
+                    "supported_interfaces",
+                    "security_requirements",
+                    "skills",
+                    "source_url",
+                    "card_url",
+                    "fetched_at",
+                    "validated_at"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "provider_name": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "agent_version": {
+                        "type": "string"
+                    },
+                    "documentation_url": {
+                        "type": "string",
+                        "format": "uri",
+                        "nullable": true
+                    },
+                    "icon_url": {
+                        "type": "string",
+                        "format": "uri",
+                        "nullable": true
+                    },
+                    "preferred_interface_url": {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "preferred_protocol_binding": {
+                        "type": "string"
+                    },
+                    "preferred_protocol_version": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/AgentListingStatus"
+                    },
+                    "has_auth": {
+                        "type": "boolean"
+                    },
+                    "supports_streaming": {
+                        "type": "boolean"
+                    },
+                    "supports_push_notifications": {
+                        "type": "boolean"
+                    },
+                    "supports_extended_agent_card": {
+                        "type": "boolean"
+                    },
+                    "default_input_modes": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "default_output_modes": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "supported_interfaces": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AgentCardSupportedInterface"
+                        }
+                    },
+                    "security_requirements": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SecurityRequirement"
+                        },
+                        "nullable": true
+                    },
+                    "skills": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AgentCardSkill"
+                        }
+                    },
+                    "source_url": {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "card_url": {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "fetched_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "validated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                }
+            },
+            "AgentCardEnvelope": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "source_url",
+                    "status",
+                    "card",
+                    "validation_warnings",
+                    "etag",
+                    "last_modified",
+                    "content_hash",
+                    "fetched_at",
+                    "validated_at"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "source_url": {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/AgentListingStatus"
+                    },
+                    "card": {
+                        "$ref": "#/components/schemas/AgentCardV1"
+                    },
+                    "validation_warnings": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "etag": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "last_modified": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "content_hash": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "fetched_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "validated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                }
+            },
+            "AgentCardV1": {
+                "type": "object",
+                "required": [
+                    "name",
+                    "description",
+                    "supportedInterfaces",
+                    "version",
+                    "capabilities",
+                    "defaultInputModes",
+                    "defaultOutputModes",
+                    "skills"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "supportedInterfaces": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AgentCardSupportedInterface"
+                        }
+                    },
+                    "provider": {
+                        "$ref": "#/components/schemas/AgentCardProvider",
+                        "nullable": true
+                    },
+                    "version": {
+                        "type": "string"
+                    },
+                    "documentationUrl": {
+                        "type": "string",
+                        "format": "uri",
+                        "nullable": true
+                    },
+                    "iconUrl": {
+                        "type": "string",
+                        "format": "uri",
+                        "nullable": true
+                    },
+                    "capabilities": {
+                        "$ref": "#/components/schemas/AgentCardCapabilities"
+                    },
+                    "securitySchemes": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "$ref": "#/components/schemas/AgentCardSecurityScheme"
+                        },
+                        "nullable": true
+                    },
+                    "securityRequirements": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SecurityRequirement"
+                        },
+                        "nullable": true
+                    },
+                    "defaultInputModes": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "defaultOutputModes": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "skills": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AgentCardSkill"
+                        }
+                    },
+                    "signatures": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "object",
+                            "additionalProperties": true
+                        },
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": true
+            },
+            "AgentCardSupportedInterface": {
+                "type": "object",
+                "required": [
+                    "url",
+                    "protocolBinding",
+                    "protocolVersion"
+                ],
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "protocolBinding": {
+                        "type": "string"
+                    },
+                    "protocolVersion": {
+                        "type": "string"
+                    },
+                    "tenant": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                }
+            },
+            "AgentCardProvider": {
+                "type": "object",
+                "required": [
+                    "organization"
+                ],
+                "properties": {
+                    "organization": {
+                        "type": "string"
+                    },
+                    "url": {
+                        "type": "string",
+                        "format": "uri",
+                        "nullable": true
+                    }
+                }
+            },
+            "AgentCardCapabilities": {
+                "type": "object",
+                "required": [
+                    "streaming",
+                    "pushNotifications",
+                    "extendedAgentCard"
+                ],
+                "properties": {
+                    "streaming": {
+                        "type": "boolean"
+                    },
+                    "pushNotifications": {
+                        "type": "boolean"
+                    },
+                    "extendedAgentCard": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "SecurityRequirement": {
+                "type": "object",
+                "additionalProperties": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "AgentCardSecurityScheme": {
+                "type": "object",
+                "properties": {
+                    "apiKeySecurityScheme": {
+                        "$ref": "#/components/schemas/ApiKeySecurityScheme",
+                        "nullable": true
+                    },
+                    "httpAuthSecurityScheme": {
+                        "$ref": "#/components/schemas/HttpAuthSecurityScheme",
+                        "nullable": true
+                    },
+                    "oauth2SecurityScheme": {
+                        "$ref": "#/components/schemas/OAuth2SecurityScheme",
+                        "nullable": true
+                    },
+                    "openIdConnectSecurityScheme": {
+                        "$ref": "#/components/schemas/OpenIdConnectSecurityScheme",
+                        "nullable": true
+                    },
+                    "mtlsSecurityScheme": {
+                        "$ref": "#/components/schemas/MutualTlsSecurityScheme",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": true
+            },
+            "ApiKeySecurityScheme": {
+                "type": "object",
+                "required": [
+                    "in",
+                    "name"
+                ],
+                "properties": {
+                    "in": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": true
+            },
+            "HttpAuthSecurityScheme": {
+                "type": "object",
+                "required": [
+                    "scheme"
+                ],
+                "properties": {
+                    "scheme": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": true
+            },
+            "OAuth2SecurityScheme": {
+                "type": "object",
+                "properties": {
+                    "flows": {
+                        "type": "object",
+                        "additionalProperties": true
+                    }
+                },
+                "additionalProperties": true
+            },
+            "OpenIdConnectSecurityScheme": {
+                "type": "object",
+                "additionalProperties": true
+            },
+            "MutualTlsSecurityScheme": {
+                "type": "object",
+                "additionalProperties": true
+            },
+            "AgentCardSkill": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "name",
+                    "description",
+                    "tags"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "tags": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "examples": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "nullable": true
+                    },
+                    "inputModes": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "nullable": true
+                    },
+                    "outputModes": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "nullable": true
+                    },
+                    "securityRequirements": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SecurityRequirement"
+                        },
+                        "nullable": true
+                    }
+                }
+            }
+        }
+    }
+}

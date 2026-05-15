@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-04-24T00:00:00Z",
+  "title": "Design System: A2A Registry",
+  "extensions": {
+    "colorMeta": {
+      "background": {
+        "role": "background",
+        "displayName": "Light/Dark Solarized NASA",
+        "canonical": "oklch(0.98 0.005 90) / oklch(0.13 0.008 250)",
+        "tonalRamp": [
+          "oklch(0.99 0.005 90)",
+          "oklch(0.98 0.005 90)",
+          "oklch(0.96 0.005 90)",
+          "oklch(0.85 0.01 90)",
+          "oklch(0.52 0.008 250)",
+          "oklch(0.245 0.007 250)",
+          "oklch(0.19 0.007 250)",
+          "oklch(0.13 0.008 250)"
+        ]
+      },
+      "accent": {
+        "role": "accent",
+        "displayName": "Solarized Violet",
+        "canonical": "oklch(0.50 0.12 285)",
+        "tonalRamp": [
+          "oklch(0.15 0.06 285)",
+          "oklch(0.25 0.08 285)",
+          "oklch(0.35 0.10 285)",
+          "oklch(0.45 0.12 285)",
+          "oklch(0.55 0.12 285)",
+          "oklch(0.65 0.12 285)",
+          "oklch(0.85 0.06 285)",
+          "oklch(0.95 0.06 285)"
+        ]
+      },
+      "solar-green": {
+        "role": "accent",
+        "displayName": "Solarized Green",
+        "canonical": "oklch(0.60 0.12 145)",
+        "tonalRamp": [ "oklch(0.30 0.06 145)", "oklch(0.40 0.08 145)", "oklch(0.50 0.10 145)", "oklch(0.60 0.12 145)", "oklch(0.70 0.12 145)", "oklch(0.80 0.12 145)", "oklch(0.90 0.06 145)", "oklch(0.95 0.06 145)" ]
+      },
+      "solar-cyan": {
+        "role": "accent",
+        "displayName": "Solarized Cyan",
+        "canonical": "oklch(0.60 0.12 200)",
+        "tonalRamp": [ "oklch(0.30 0.06 200)", "oklch(0.40 0.08 200)", "oklch(0.50 0.10 200)", "oklch(0.60 0.12 200)", "oklch(0.70 0.12 200)", "oklch(0.80 0.12 200)", "oklch(0.90 0.06 200)", "oklch(0.95 0.06 200)" ]
+      },
+      "solar-orange": {
+        "role": "accent",
+        "displayName": "Solarized Orange",
+        "canonical": "oklch(0.55 0.15 45)",
+        "tonalRamp": [ "oklch(0.30 0.08 45)", "oklch(0.40 0.10 45)", "oklch(0.50 0.12 45)", "oklch(0.55 0.15 45)", "oklch(0.65 0.15 45)", "oklch(0.75 0.15 45)", "oklch(0.85 0.10 45)", "oklch(0.95 0.05 45)" ]
+      },
+      "solar-blue": {
+        "role": "accent",
+        "displayName": "Solarized Blue",
+        "canonical": "oklch(0.55 0.12 250)",
+        "tonalRamp": [ "oklch(0.15 0.06 250)", "oklch(0.25 0.08 250)", "oklch(0.35 0.10 250)", "oklch(0.45 0.12 250)", "oklch(0.55 0.12 250)", "oklch(0.65 0.12 250)", "oklch(0.85 0.06 250)", "oklch(0.95 0.06 250)" ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Mission Designation",
+        "purpose": "Agent names and hero headings only."
+      },
+      "label": {
+        "displayName": "Technical Label",
+        "purpose": "Small metadata and section markers."
+      }
+    },
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "High-contrast action for primary tasks.",
+      "html": "<button class=\"ds-btn-primary\">COPY CARD URL</button>",
+      "css": ".ds-btn-primary { background: var(--foreground); color: var(--background); padding: 8px 16px; font-family: Figtree, sans-serif; font-size: 12px; font-weight: 500; border-radius: 4px; border: none; transition: opacity 0.2s; cursor: pointer; } .ds-btn-primary:hover { opacity: 0.9; }"
+    },
+    {
+      "name": "Metadata Badge",
+      "kind": "chip",
+      "refersTo": "badge",
+      "description": "Small technical indicator for agent capabilities.",
+      "html": "<span class=\"ds-badge\">streaming</span>",
+      "css": ".ds-badge { border: 1px solid var(--border); color: var(--muted-foreground); padding: 2px 6px; font-family: ui-monospace, monospace; font-size: 10px; border-radius: 4px; display: inline-block; }"
+    },
+    {
+      "name": "Agent Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Main container for agent information.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-title\">Agent Name</div><div class=\"ds-card-content\">Metadata description text.</div></div>",
+      "css": ".ds-card { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 24px; display: flex; flex-direction: column; gap: 16px; } .ds-card-title { font-family: Figtree, sans-serif; font-weight: 600; font-size: 18px; } .ds-card-content { font-family: Figtree, sans-serif; font-size: 14px; color: var(--muted-foreground); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Decommissioned Mission Patch",
+    "overview": "The A2A Registry infrastructure exists in a functional duality: The Technical Archive (Light) and The Cold Terminal (Dark). Both prioritize clarity and engineered precision over stylistic trends.",
+    "keyCharacteristics": [
+      "Dual-State Infrastructure",
+      "Infrastructure, not product",
+      "Commanding Typography",
+      "High Restraint"
+    ],
+    "rules": [
+      { "name": "The Restraint Rule", "body": "The primary accent is used on ≤10% of any given screen.", "section": "colors" },
+      { "name": "The Functional Color Rule", "body": "Use Solarized functional accents strictly for encoding meaning.", "section": "colors" },
+      { "name": "The Designation Rule", "body": "Agent names are system designations, never just titles.", "section": "typography" },
+      { "name": "The Tonal Layering Rule", "body": "Depth is communicated by tonal shifts, not shadows.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do use OKLCH for all color definitions.",
+      "Do use Big Shoulders Display for agent names.",
+      "Do use system monospace for technical data."
+    ],
+    "donts": [
+      "Don't use border-left accent stripes.",
+      "Don't use gradient text.",
+      "Don't use marketing language."
+    ]
+  }
+}

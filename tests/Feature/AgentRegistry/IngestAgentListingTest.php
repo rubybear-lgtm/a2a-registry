@@ -1,14 +1,15 @@
 <?php
 
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 
 uses(RefreshDatabase::class);
 
-test('operators can ingest a valid agent card', function () {
-    config()->set('agent-registry.operator_emails', ['operator@example.com']);
+beforeEach(function (): void {
+    config(['agent-registry.management_token' => 'registry-secret']);
+});
 
+test('admins can ingest a valid agent card with the management token', function () {
     Http::fake([
         'https://agents.example.com/.well-known/agent-card.json' => Http::response([
             'name' => 'Route Planner',
@@ -49,11 +50,7 @@ test('operators can ingest a valid agent card', function () {
         ]),
     ]);
 
-    $user = User::factory()->create([
-        'email' => 'operator@example.com',
-    ]);
-
-    $this->actingAs($user)
+    $this->withToken('registry-secret')
         ->postJson(route('agent-listings.store'), [
             'source_url' => 'https://agents.example.com/.well-known/agent-card.json',
         ])
@@ -75,23 +72,68 @@ test('operators can ingest a valid agent card', function () {
     ]);
 });
 
-test('non-operators may not ingest agent cards', function () {
-    config()->set('agent-registry.operator_emails', ['operator@example.com']);
+test('ingestion requires a valid management token', function () {
+    $this->postJson(route('agent-listings.store'), [
+        'source_url' => 'https://agents.example.com/.well-known/agent-card.json',
+    ])->assertForbidden();
 
-    $user = User::factory()->create([
-        'email' => 'member@example.com',
-    ]);
-
-    $this->actingAs($user)
+    $this->withToken('wrong-token')
         ->postJson(route('agent-listings.store'), [
             'source_url' => 'https://agents.example.com/.well-known/agent-card.json',
         ])
         ->assertForbidden();
 });
 
-test('ingestion returns validation errors for malformed agent cards', function () {
-    config()->set('agent-registry.operator_emails', ['operator@example.com']);
+test('ingesting an existing source url is rejected', function () {
+    Http::fake([
+        'https://agents.example.com/.well-known/agent-card.json' => Http::response([
+            'name' => 'Route Planner',
+            'description' => 'Plans routes for travelers.',
+            'supportedInterfaces' => [
+                [
+                    'url' => 'https://agents.example.com/a2a',
+                    'protocolBinding' => 'JSONRPC',
+                    'protocolVersion' => '1.0',
+                ],
+            ],
+            'provider' => [
+                'organization' => 'Example Agents',
+                'url' => 'https://example.com',
+            ],
+            'version' => '1.2.3',
+            'capabilities' => [
+                'streaming' => true,
+                'pushNotifications' => false,
+                'extendedAgentCard' => false,
+            ],
+            'defaultInputModes' => ['text/plain'],
+            'defaultOutputModes' => ['application/json'],
+            'skills' => [
+                [
+                    'id' => 'route-planning',
+                    'name' => 'Route Planning',
+                    'description' => 'Creates travel itineraries and routes.',
+                    'tags' => ['travel', 'maps'],
+                ],
+            ],
+        ], 200, [
+            'Content-Type' => 'application/json',
+        ]),
+    ]);
 
+    $this->withToken('registry-secret')
+        ->postJson(route('agent-listings.store'), [
+            'source_url' => 'https://agents.example.com/.well-known/agent-card.json',
+        ])->assertCreated();
+
+    $this->withToken('registry-secret')
+        ->postJson(route('agent-listings.store'), [
+            'source_url' => 'https://agents.example.com/.well-known/agent-card.json',
+        ])->assertUnprocessable()
+        ->assertJsonValidationErrors(['source_url']);
+});
+
+test('ingestion returns validation errors for malformed agent cards', function () {
     Http::fake([
         'https://agents.example.com/.well-known/agent-card.json' => Http::response([
             'name' => 'Broken Agent',
@@ -101,11 +143,7 @@ test('ingestion returns validation errors for malformed agent cards', function (
         ]),
     ]);
 
-    $user = User::factory()->create([
-        'email' => 'operator@example.com',
-    ]);
-
-    $this->actingAs($user)
+    $this->withToken('registry-secret')
         ->postJson(route('agent-listings.store'), [
             'source_url' => 'https://agents.example.com/.well-known/agent-card.json',
         ])

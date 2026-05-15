@@ -107,10 +107,14 @@ export default [
     },
     {
         ignores: [
+            '.agents/**',
+            '.codex/**',
+            '.impeccable-live.json',
             'vendor',
             'node_modules',
             'public',
             'bootstrap/ssr',
+            'sdk/**',
             'tailwind.config.js',
             'vite.config.ts',
             'resources/js/actions/**',

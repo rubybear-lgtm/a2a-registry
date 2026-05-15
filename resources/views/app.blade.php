@@ -22,11 +22,11 @@
         {{-- Inline style to set the HTML background color based on our theme in app.css --}}
         <style>
             html {
-                background-color: oklch(1 0 0);
+                background-color: oklch(0.98 0.005 90);
             }
 
             html.dark {
-                background-color: oklch(0.145 0 0);
+                background-color: oklch(0.13 0.008 250);
             }
         </style>
 
@@ -45,5 +45,6 @@
     </head>
     <body class="font-sans antialiased">
         <x-inertia::app />
-    </body>
+
+</body>
 </html>
