@@ -1,6 +1,6 @@
 {
     "name": "@a2a-registry/sdk",
-    "version": "1.0.0",
+    "version": "1.0.0-alpha.1",
     "description": "TypeScript client for the A2A Registry API — discover and browse registered A2A protocol agents.",
     "license": "MIT",
     "author": "A2A Registry Contributors",
